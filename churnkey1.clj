@@ -2,41 +2,25 @@
     (text-field
         :name         "appId"
         :label        "App ID"
-        :placeholder  "Enter Api Key"
-        :required     true
-    )
-
+        :placeholder  "Enter App ID"
+        :required     true)
     (password-field
         :name         "apiKey"
-        :label        "Api-key"
-        :placeholder  "Enter Api Key"
-        :required     true
-    )
-
-)
-
+        :label        "Apikey"
+        :placeholder  "Enter Apikey"
+        :required     true))
 (default-source (http/get :base-url "https://api.churnkey.co/v1/data"
                     (Auth/apikey-custom-header :headerName "x-ck-api-key")
                     (header-params 
-                                   "x-ck-app"     "{appId}",
-                                   "x-ck-api-key" "{apikey}",
-                                   "content-type" "application/json"))
-                    
-                    
-)
-
+                                   "x-ck-app"     "{appId}"
+                                   "content-type" "application/json")))
 (entity sessions
-        "This entity will return an array of sessions"
         (api-docs-url "https://docs.churnkey.co/data-api")
         (source (http/get : url "/sessions")
                 (setup-test
-                  (upon-receiving :code 200 (pass) ; default and thus optional
-                                  :code 429 (fail :message "generally too many requests")
-                                  ))
-)
-
+                  (upon-receiving :code 200 (pass) )))
         (fields
-          id   :<= "_id"
+          id   :<= "_id" 
           org
           blueprint_id :<= "bluerprintId"
           segment_id :<= "segmentId"
@@ -54,9 +38,7 @@
           created_at :<= "createdAt"
           updated_at :<= "updatedAt"
           recording_end_time :<= "recordingEndTime"
-          recording_start_time :<= "recordingStartTime"
-        )
-
+          recording_start_time :<= "recordingStartTime")
         (dynamic-fields
           (flatten-fields
             (fields
@@ -74,7 +56,6 @@
               billing_interval :<= "billingInterval"
               billing_interval_count :<= "billingIntervalCount")
               :from "customer")
-
           (flatten-fields
             (fields
               guid
@@ -82,26 +63,15 @@
               pause_interval :<= "pauseInterval"
               pause_duration :<= "pauseDuration")
               :from "accepted") 
-
-
           (relate 
-          (contains-list-of PRESENTED_OFFERS :inside-prop "presentedOffers"))
-    
-        )
-
+          (contains-list-of PRESENTED_OFFERS :inside-prop "presentedOffers")))
         (sync-plan
           (change-capture-cursor "updatedAt"
            (subset/by-time (query-params "startDate" "$FROM"
                                          "endDate" "$TO")
                            (format "yyyy-MM-dd'T'HH:mm:ssZ")
                            (step-size "24 hr")
-                           (initial  "2023-01-01T00:00:00Z")
-                        :;(save)
-                        )))
-
-        
-)
-
+                           (initial  "2023-01-01T00:00:00Z")))))
 (entity PRESENTED_OFFERS
     (fields
         guid :<= "gu_id"
@@ -110,20 +80,15 @@
         declined_at :<= "declinedAt"
         survey_offer :<= "surveyOffer"
         offer_type :<= "offerType")
-
   (dynamic-fields
     (flatten-fields
        (fields
           max_pause_length :<= "maxPauseLength"
           pause_interval :<= "pauseInterval")
-          :from "pauseConfig" :prefix "pause_config_"
-    )
+          :from "pauseConfig" :prefix "pause_config_")
     (flatten-fields
        (fields
           coupon_id :<= "couponId")
-          :from "discountedConfig" :prefix "discounted_config_"
-    )
-  )
+          :from "discountedConfig" :prefix "discounted_config_"))
   (relate
-    (needs sessions :prop "id"))    
-)
+    (needs sessions :prop "id")))
