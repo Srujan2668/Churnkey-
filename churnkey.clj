@@ -1,3 +1,5 @@
+
+
 (config
     (text-field
         :name         "appId"
@@ -96,7 +98,7 @@
                            (format "yyyy-MM-dd'T'HH:mm:ssZ")
                            (step-size "24 hr")
                            (initial  "2023-01-01T00:00:00Z")
-                        (save)
+                        :;(save)
                         )))
 
         
@@ -127,8 +129,3 @@
   (relate
     (needs sessions :prop "id"))    
 )
-
-
-
-
-
