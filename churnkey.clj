@@ -16,10 +16,11 @@
 )
 
 (default-source (http/get :base-url "https://api.churnkey.co/v1/data"
-                    (Auth/apikey-custom-header )
+                    (Auth/apikey-custom-header :headerName "x-ck-api-key")
                     (header-params 
-                                   "x-ck-app"      "{appId}",
-                                   "content-type"  "application/json"))
+                                   "x-ck-app"     "{appId}",
+                                   "x-ck-api-key" "{apikey}",
+                                   "content-type" "application/json"))
                     
                     
 )
@@ -27,7 +28,12 @@
 (entity sessions
         "This entity will return an array of sessions"
         (api-docs-url "https://docs.churnkey.co/data-api")
-        (source (http/get : url "/sessions"))
+        (source (http/get : url "/sessions")
+                (setup-test
+                  (upon-receiving :code 200 (pass) ; default and thus optional
+                                  :code 429 (fail :message "generally too many requests")
+                                  ))
+)
 
         (fields
           id   :<= "_id"
@@ -84,13 +90,13 @@
         )
 
         (sync-plan
-          (change-capture-cursor
+          (change-capture-cursor "updatedAt"
            (subset/by-time (query-params "startDate" "$FROM"
                                          "endDate" "$TO")
                            (format "yyyy-MM-dd'T'HH:mm:ssZ")
                            (step-size "24 hr")
                            (initial  "2023-01-01T00:00:00Z")
-                        ;;    (save)
+                        (save)
                         )))
 
         
